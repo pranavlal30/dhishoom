@@ -2,17 +2,17 @@ import sys
 from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
-if __name__ == “__main__”:
-    sc = SparkContext(appName=”PythonStreamingDirectKafkaWordCount”)
+import numpy as np
+if __name__ == "__main__":
+    sc = SparkContext(appName="PythonStreamingDirectKafkaWordCount")
     ssc = StreamingContext(sc, 2)
-    brokers = 'sandbox-hdp.hortonworks.com:6667'
-    topic = 'test_stream'
+    brokers = 'localhost:9092'
+    topic = 'test2'
     kafkaParams = {"metadata.broker.list": brokers}
-    kvs = KafkaUtils.createDirectStream(ssc, [topic], kafkaParams)
-    lines = kvs.map(lambda x: x[1])
-    counts = lines.flatMap(lambda line: line.split(“ “)) \
-                  .map(lambda word: (word, 1)) \
-                  .reduceByKey(lambda a, b: a+b)
-    counts.pprint()
+    kvs = KafkaUtils.createDirectStream(ssc, [topic], kafkaParams, valueDecoder=lambda x: x)
+    wav_data = kvs.map(lambda x: np.loads(x[1]))
+    print type(wav_data)
+    print 'asdfsf'
+    wav_data.pprint()
     ssc.start()
     ssc.awaitTermination()
